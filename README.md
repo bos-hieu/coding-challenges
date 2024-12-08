@@ -51,8 +51,8 @@ The real-time quiz feature consists of the following components:
 
 ### Implementation
 - **Technology Stack**:
-  - **Frontend**: React.js with Socket.IO Client for real-time communication.
-  - **Quiz Service**: Node.js with Express.js and Socket.IO for real-time messaging.
+  - **Frontend**: React.js with Socket.IO Client for real-time communication. [Code](frontend)
+  - **Quiz Service**: Node.js with Express.js and Socket.IO for real-time messaging. [Code](quiz-service)
   - **Database**: MongoDB for storing quiz data.
   - **Real-Time Messaging**: Socket.IO for real-time updates.
 
