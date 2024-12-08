@@ -1,73 +1,62 @@
-# Real-Time Vocabulary Quiz Coding Challenge
+## Solution
+- Requirements: [requirements.md](requirements.md)
 
-## Overview
+### System Design Document
+#### Architecture Diagram
+![architecture.png](architecture.png)
 
-Welcome to the Real-Time Quiz coding challenge! Your task is to create a technical solution for a real-time quiz feature for an English learning application. This feature will allow users to answer questions in real-time, compete with others, and see their scores updated live on a leaderboard.
+#### Component Descriptions
+The real-time quiz feature consists of the following components:
+- **Users**: The end-users who participate in the quiz sessions.
+- **Client Applications (Web/Mobile)**: The front-end applications that users interact with to join quizzes, submit answers, and view leaderboards. These applications can be web-based or mobile applications. They are responsible for rendering the user interface and handling user interactions.
+- **Content Delivery Network (CDN)**: Serves static assets like images, CSS, and JavaScript files to users. It helps in reducing latency and improving the performance of the client applications.
+- **Load Balancer**: Distributes incoming traffic across multiple servers to ensure optimal resource utilization, reliability, and scalability.
+- **API Gateway**: Acts as a single entry point for all API requests from the client applications. It handles user authentication, manages quizzes, scoring, and leaderboards, and forwards requests to the appropriate services, such as the User Service and Quiz Service.
+- **User Service**: Manages user authentication, user profiles, and user-related data. It interacts with the User Database to store and fetch user data.
+- **Quiz Service**: Manages quizzes, scoring, and leaderboards. It interacts with the Quiz Database to store and retrieve quiz-related data. The Quiz Service also caches frequently accessed data using the Cache Layer and sends real-time updates to users via the Real-Time Messaging System.
+- **Cache Layer**: Stores frequently accessed data to reduce latency and improve performance. It acts as a middle layer between the Quiz Service and the Quiz Database.
+- **Quiz Database (SQL/NoSQL)**: Stores quiz-related data, such as quiz questions, answers, scores, and leaderboard information.
+- **User Database (SQL/NoSQL)**: Stores user-related data, such as user profiles, authentication details.
+- **Real-Time Messaging System (WebSocket / Pub/Sub)**: Delivers real-time updates to users, such as score updates and leaderboard changes. It ensures that users receive real-time data without the need to refresh the page.
+- **Monitoring & Observability**: Collects logs and metrics from different components of the system to monitor performance, diagnose issues, tracing, and debugging, ensuring the system's reliability and availability.
 
-## Acceptance Criteria
-
-1. **User Participation**:
-   - Users should be able to join a quiz session using a unique quiz ID.
-   - The system should support multiple users joining the same quiz session simultaneously.
+#### Data Flow
+1. **User Authentication & Quiz Participation**:
+   - Users access the client applications (web/mobile) and authenticate themselves.
+   - The client applications interact with the API Gateway to handle user authentication and profile management.
+   - Upon successful authentication, users join a quiz session by providing a unique quiz ID.
+   - The API Gateway forwards the quiz participation request to the Quiz Service.
+   - The Quiz Service interacts with the Quiz Database to retrieve quiz-related data and manages the user's participation in the quiz session.
 
 2. **Real-Time Score Updates**:
-   - As users submit answers, their scores should be updated in real-time.
-   - The scoring system must be accurate and consistent.
+    - As users submit answers to quiz questions, the client applications send the answers to the Quiz Service.
+    - The Quiz Service calculates the scores based on the submitted answers and updates the user's score in the Quiz Database.
+    - The Quiz Service sends real-time score updates to the Real-Time Messaging System.
+    - The Real-Time Messaging System delivers the score updates to the client applications in real-time, ensuring that users see their scores updated without page refreshes.
 
-3. **Real-Time Leaderboard**:
-   - A leaderboard should display the current standings of all participants.
-   - The leaderboard should update promptly as scores change.
+3. **Real-Time Leaderboard Updates**:
+    - The Quiz Service updates the leaderboard based on the latest scores of all participants.
+    - The Quiz Service sends real-time leaderboard updates to the Real-Time Messaging System.
+    - The Real-Time Messaging System delivers the leaderboard updates to the client applications in real-time, ensuring that users see the current standings of all participants.
 
-## Challenge Requirements
+#### Technologies and Tools
+- **Client Applications (Web/Mobile)**: I chose React.js for web applications because of its component-based architecture and rich ecosystem of libraries and tools. For mobile applications, I would use React Native for cross-platform development. We also can use shared components between web and mobile applications because of React's component reusability.
+- **Content Delivery Network (CDN)**: I would use a CDN like Cloudflare to cache and deliver static assets to users globally, reducing latency and improving performance.
+- **Load Balancer**: Depending on the cloud provider, if using Amazon Web Services (AWS), we would use Elastic Load Balancing (ELB). If using Google Cloud Platform (GCP), we would use Google Cloud Load Balancing. These services are native to their respective cloud providers and provide automatic scaling, high availability, and fault tolerance.
+- **API Gateway**: We would use Amazon API Gateway if using AWS or Google Cloud Endpoints if using GCP. These services provide a managed API gateway that handles API requests, authentication, rate limiting, and monitoring.
+- **User Service**: For user authentication and profile management, we would use Golang with the Gin framework and MongoDB for the User Database. Golang is known for its performance and concurrency support, making it suitable for handling user requests. MongoDB is a NoSQL database that provides flexibility and scalability for storing user data.
+- **Quiz Service**: For managing quizzes, scoring, and leaderboards, we would use Node.js with Express.js and websockets for real-time updates. We would use MongoDB for the Quiz Database and Redis for the Cache Layer. 
+- **Real-Time Messaging System**: We would use WebSockets for real-time communication between the Quiz Service and client applications. WebSockets provide full-duplex communication channels over a single TCP connection, enabling real-time updates without polling.
+- **Monitoring & Observability**: If the optimized cost is a priority, we would use Prometheus for monitoring and Grafana for visualization. Otherwise, we would use Datadog for a more comprehensive monitoring solution.
 
-### Part 1: System Design
+### Implementation
+- **Technology Stack**:
+  - **Frontend**: React.js with Socket.IO Client for real-time communication.
+  - **Quiz Service**: Node.js with Express.js and Socket.IO for real-time messaging.
+  - **Database**: MongoDB for storing quiz data.
+  - **Real-Time Messaging**: Socket.IO for real-time updates.
 
-1. **System Design Document**:
-   - **Architecture Diagram**: Create an architecture diagram illustrating how different components of the system interact. This should include all components required for the feature, including the server, client applications, database, and any external services.
-   - **Component Description**: Describe each component's role in the system.
-   - **Data Flow**: Explain how data flows through the system from when a user joins a quiz to when the leaderboard is updated.
-   - **Technologies and Tools**: List and justify the technologies and tools chosen for each component.
-
-### Part 2: Implementation
-
-1. **Pick a Component**:
-   - Implement one of the core components below using the technologies that you are comfortable with. The rest of the system can be mocked using mock services or data.
-
-2. **Requirements for the Implemented Component**:
-   - **Real-time Quiz Participation**: Users should be able to join a quiz session using a unique quiz ID.
-   - **Real-time Score Updates**: Users' scores should be updated in real-time as they submit answers.
-   - **Real-time Leaderboard**: A leaderboard should display the current standings of all participants in real-time.
-
-3. **Build For the Future**:
-   - **Scalability**: Design and implement your component with scalability in mind. Consider how the system would handle a large number of users or quiz sessions. Discuss any trade-offs you made in your design and implementation.
-   - **Performance**: Your component should perform well even under heavy load. Consider how you can optimize your code and your use of resources to ensure high performance.
-   - **Reliability**: Your component should be reliable and handle errors gracefully. Consider how you can make your component resilient to failures.
-   - **Maintainability**: Your code should be clean, well-organized, and easy to maintain. Consider how you can make it easy for other developers to understand and modify your code.
-   - **Monitoring and Observability**: Discuss how you would monitor the performance of your component and diagnose issues. Consider how you can make your component observable.
-
-## Submission Guidelines
-
-Candidates are required to submit the following as part of the coding challenge:
-
-1. **System Design Documents**:
-   - **Architecture Diagram**: Illustrate the interaction of system components (server, client applications, database, etc.).
-   - **Component Descriptions**: Explain the role of each component.
-   - **Data Flow**: Describe how data flows from user participation to leaderboard updates.
-   - **Technology Justification**: List the chosen technologies and justify why they were selected.
-
-2. **Working Code**:
-   - Choose one of the core components mentioned in the requirements and implement it using your preferred technologies. The rest of the system can be mocked using appropriate mock services or data.
-   - Ensure the code meets criteria such as scalability, performance, reliability, maintainability, and observability.
-
-3. **Video Submission**:
-   - Record a short video (5-10 minutes) where you address the following:
-     - **Introduction**: Introduce yourself and state your name.
-     - **Assignment Overview**: Describe the technical assignment that ELSA gave in your own words. Feel free to mention any assumptions or clarifications you made.
-     - **Solution Overview**: Provide a crisp overview of your solution, highlighting key design and implementation elements.
-     - **Demo**: Run the code on your local machine and walk us through the output or any tests you’ve written to verify the functionality.
-     - **Conclusion**: Conclude with any remarks, such as challenges faced, learnings, or further improvements you would make.
-
-   **Video Requirements**:
-   - The video must be between **5-10 minutes**. Any submission beyond 10 minutes will be rejected upfront.
-   - Use any recording device (smartphone, webcam, etc.), ensuring good audio and video quality.
-   - Ensure clear and concise communication.
+- **Features**:
+  - **Real-time Quiz Participation**: Users can join a quiz session using a unique quiz ID.
+  - **Real-time Score Updates**: Users' scores are updated in real-time as they submit answers.
+  - **Real-time Leaderboard**: A leaderboard displays the current standings of all participants in real-time.
